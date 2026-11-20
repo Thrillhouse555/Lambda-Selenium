@@ -67,9 +67,25 @@ public class SeleniumLambdaHandler implements RequestHandler<Map<String, Object>
         if (remoteWebDriverUrl != null) {
             System.setProperty("webdriver.remote.url", remoteWebDriverUrl);
             System.setProperty("webdriver.driver", "remote");
+        } else {
+            System.setProperty("webdriver.driver", "chrome");
+            System.setProperty("webdriver.autodownload", "false");
+            applyEnvProperty("webdriver.chrome.driver", "CHROMEDRIVER_PATH");
+            applyEnvProperty("chrome.binary", "CHROME_BIN");
+            System.setProperty(
+                    "chrome.switches",
+                    "--headless=new;--disable-gpu;--no-sandbox;--disable-dev-shm-usage;--disable-extensions;--disable-setuid-sandbox;--window-size=1920,1080"
+            );
         }
 
         System.setProperty("serenity.outputDirectory", "/tmp/serenity");
+    }
+
+    private static void applyEnvProperty(String systemProperty, String envKey) {
+        String value = System.getenv(envKey);
+        if (value != null && !value.isBlank()) {
+            System.setProperty(systemProperty, value);
+        }
     }
 
     private static void applyProperty(String systemProperty, Map<String, Object> event, String eventKey, String envKey) {

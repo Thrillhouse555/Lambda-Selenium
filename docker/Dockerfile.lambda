@@ -1,0 +1,31 @@
+FROM maven:3.9.9-eclipse-temurin-17 AS build
+WORKDIR /workspace
+COPY pom.xml ./
+COPY src ./src
+COPY serenity.properties ./
+RUN mvn -P lambda clean package -DskipTests
+
+FROM public.ecr.aws/lambda/java:17
+
+RUN yum -y update && \
+    yum -y install unzip xz tar atk cups-libs gtk3 libXcomposite libXcursor libXdamage libXext libXi libXrandr libXScrnSaver libXtst pango alsa-lib at-spi2-atk libdrm libgbm nss mesa-libgbm && \
+    yum clean all
+
+RUN curl -L -o /tmp/chrome-linux64.zip https://storage.googleapis.com/chrome-for-testing-public/131.0.6778.264/linux64/chrome-linux64.zip && \
+    unzip /tmp/chrome-linux64.zip -d /opt && \
+    mv /opt/chrome-linux64 /opt/chrome && \
+    ln -s /opt/chrome/chrome /usr/bin/google-chrome && \
+    rm -f /tmp/chrome-linux64.zip
+
+RUN curl -L -o /tmp/chromedriver-linux64.zip https://storage.googleapis.com/chrome-for-testing-public/131.0.6778.264/linux64/chromedriver-linux64.zip && \
+    unzip /tmp/chromedriver-linux64.zip -d /opt && \
+    mv /opt/chromedriver-linux64/chromedriver /usr/bin/chromedriver && \
+    chmod +x /usr/bin/chromedriver && \
+    rm -rf /tmp/chromedriver-linux64.zip /opt/chromedriver-linux64
+
+COPY --from=build /workspace/target/selenium-cucumber-serenity-lambda.jar ${LAMBDA_TASK_ROOT}/lib/app.jar
+
+ENV CHROME_BIN=/usr/bin/google-chrome
+ENV CHROMEDRIVER_PATH=/usr/bin/chromedriver
+
+CMD ["uk.georgeansell.lambda.SeleniumLambdaHandler::handleRequest"]
