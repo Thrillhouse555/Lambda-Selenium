@@ -74,7 +74,7 @@ public class SeleniumLambdaHandler implements RequestHandler<Map<String, Object>
             applyEnvProperty("chrome.binary", "CHROME_BIN");
             System.setProperty(
                     "chrome.switches",
-                    "--headless=new;--disable-gpu;--no-sandbox;--disable-dev-shm-usage;--disable-extensions;--disable-setuid-sandbox;--window-size=1920,1080"
+                    "--headless=new;--disable-gpu;--no-sandbox;--disable-dev-shm-usage;--disable-extensions;--disable-setuid-sandbox;--single-process;--no-zygote;--window-size=1920,1080;--user-data-dir=/tmp/chrome-user-data;--data-path=/tmp/chrome-data;--disk-cache-dir=/tmp/chrome-cache"
             );
         }
 

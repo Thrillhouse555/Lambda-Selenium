@@ -8,7 +8,10 @@ RUN mvn -P lambda clean package -DskipTests
 FROM public.ecr.aws/lambda/java:17
 
 RUN yum -y update && \
-    yum -y install unzip xz tar atk cups-libs gtk3 libXcomposite libXcursor libXdamage libXext libXi libXrandr libXScrnSaver libXtst pango alsa-lib at-spi2-atk libdrm libgbm nss mesa-libgbm && \
+    yum -y install unzip xz tar atk cups-libs gtk3 pango alsa-lib at-spi2-atk \
+    libX11 libX11-xcb libXcomposite libXcursor libXdamage libXext libXfixes libXi libXrandr libXScrnSaver libXtst libxcb libxkbcommon \
+    libdrm libgbm mesa-libgbm nss nspr \
+    fontconfig freetype dejavu-sans-fonts liberation-fonts xorg-x11-fonts-Type1 xorg-x11-fonts-misc && \
     yum clean all
 
 RUN curl -L -o /tmp/chrome-linux64.zip https://storage.googleapis.com/chrome-for-testing-public/131.0.6778.264/linux64/chrome-linux64.zip && \
@@ -27,5 +30,6 @@ COPY --from=build /workspace/target/selenium-cucumber-serenity-lambda.jar ${LAMB
 
 ENV CHROME_BIN=/usr/bin/google-chrome
 ENV CHROMEDRIVER_PATH=/usr/bin/chromedriver
+ENV HOME=/tmp
 
 CMD ["uk.georgeansell.lambda.SeleniumLambdaHandler::handleRequest"]
